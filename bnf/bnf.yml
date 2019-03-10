@@ -1,0 +1,60 @@
+basics:
+  alter: "|"
+  group: "()"
+  option: "[]" # (0 or 1 time)
+  repete: "{}" # (0 -> n times)
+
+definitions:
+  newline: 'the Unicode code point U+000A .'
+  unicodeChar: 'an arbitrary Unicode code point except newline .'
+  unicodeLetter: 'a Unicode code point classified as "Letter" .'
+  unicodeDigit: 'a Unicode code point classified as "Number, decimal digit" .'
+
+primitives:
+  letter: '[a-f] | [A-F] | _'
+  decimalDigit: '[0-9]'
+  octalDigit: '[0-7]'
+  hexDigit: '[0-9] | [A-F] | [a-f]'
+
+variableIdentifier: 'letter { letter | decimalDigit }'
+possibleType: ['string', 'int', 'long', 'double', 'float']
+keywords: ['func', 'break', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'package', 'switch', 'const', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var']
+punctuation: ['+', '&', '+=', '&=', '&&', '==', '!=', '(', ')', '-', '|', '-=', '|=', '||', '<', '<=', '[', ']', '*', '^', '*=', '^=', '<-', '>', '>=', '{', '}', '/', '<<', '/=', '<<=', '++', '=', ':=', ',', ';', '%', '>>', '%=', '--', '!', '...', '.', ':']
+
+integerLiterals:
+  alternatives:
+  - type: 'decimalLit | octalLit | hexLit'
+    decimalLit: '( [1-9] ) { decimalDigit }'
+    octalLit: '0 { octalDigit }'
+    hexLit: '0 ( x | X ) hexDigit { hexDigit }'
+
+floatLiterals:
+  alternatives:
+  - type: 'decimals . [ decimals ] [ exponent ] | . decimals [ exponent ]'
+    decimals: 'decimalDigit { decimalDigit }'
+    exponent: '( e | E ) [ + | - ] decimals'
+
+stringLiterals:
+  alternatives:
+  - type: ' " { unicode_char | newline } " '
+
+arrayLiterals:
+  alternatives:
+  - type: 'possibleType [ length ]'
+    length: 'expression'
+
+structTypes:
+  alternatives:
+  - type: 'struct { { fieldDecl ; } }'
+    fieldDecl: '(identifierList possibleType | embeddedField) [ tag ]'
+    embeddedField: '[ * ] typeName'
+    tag: 'stringLit'
+
+functionTypes:
+  alternatives:
+  - type: 'def signature'
+    signature: 'parameters [ result ]'
+    result: 'parameters possibleType'
+    parameters: '( [ parameterList ] )'
+    parameterList: 'parameterDecl { , parameterDecl }'
+    parameterDecl: '[ identifierList ] [ ... ] possibleType'
