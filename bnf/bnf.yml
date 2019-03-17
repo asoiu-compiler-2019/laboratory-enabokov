@@ -17,9 +17,11 @@ primitives:
   hexDigit: '[0-9] | [A-F] | [a-f]'
 
 variableIdentifier: 'letter { letter | decimalDigit }'
-possibleType: ['string', 'int', 'long', 'double', 'float']
+types: ['string', 'int', 'long', 'double', 'float']
 keywords: ['func', 'break', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'package', 'switch', 'const', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var']
-punctuation: ['+', '&', '+=', '&=', '&&', '==', '!=', '(', ')', '-', '|', '-=', '|=', '||', '<', '<=', '[', ']', '*', '^', '*=', '^=', '<-', '>', '>=', '{', '}', '/', '<<', '/=', '<<=', '++', '=', ':=', ',', ';', '%', '>>', '%=', '--', '!', '...', '.', ':']
+operators: ['+', '&', '+=', '&=', '&&', '==', '!=', '-', '|', '-=', '|=', '||', '<', '<=',  '*', '^', '*=', '^=', '<-', '>', '>=', '/', '<<', '/=', '<<=', '++', '=',  '%', '>>', '%=', '--', '!', ':']
+punctuation: ['(', ')', '[', ']', '{', '}', ',', ';', '...', '.']
+comments: '//'
 
 integerLiterals:
   alternatives:

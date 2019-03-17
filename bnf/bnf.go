@@ -17,9 +17,11 @@ type BNF struct {
 	Definitions        map[string]string `yaml:"definitions"`
 	Primitives         map[string]string `yaml:"primitives"`
 	VariableIdentifier string            `yaml:"variableIdentifier"`
-	PossibleType       []string          `yaml:"possibleType"`
+	Types              []string          `yaml:"types"`
 	Keywords           []string          `yaml:"keywords"`
+	Operators          []string          `yaml:"operators"`
 	Punctuation        []string          `yaml:"punctuation"`
+	Comments           string            `yaml:"comments"`
 	IntegerLiterals    Alternatives      `yaml:"integerLiterals"`
 	FloatLiterals      Alternatives      `yaml:"floatLiterals"`
 	StringLiterals     Alternatives      `yaml:"stringLiterals"`

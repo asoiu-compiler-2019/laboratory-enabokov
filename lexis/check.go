@@ -1,14 +1,13 @@
 package lexis
 
 import (
+	"regexp"
 	"strconv"
-	"strings"
-	"unicode"
 )
 
-func checkValueInArray(value string, array []string) bool {
-	for _, element := range array {
-		if element == value {
+func isKeyword(lexeme string) bool {
+	for _, key := range bnfConfig.Keywords {
+		if key == lexeme {
 			return true
 		}
 	}
@@ -16,48 +15,56 @@ func checkValueInArray(value string, array []string) bool {
 	return false
 }
 
-func checkValueIsString(value string) bool {
-	if strings.Contains(value, "\"") {
-		return true
+func isType(lexeme string) bool {
+	for _, key := range bnfConfig.Types {
+		if key == lexeme {
+			return true
+		}
 	}
 
 	return false
 }
 
-func checkValueIsNumber(value string) bool {
-	if checkValueIsString(value) {
-		return false
-	}
-
-	if _, err := strconv.Atoi(string(value)); err != nil {
+func isDigit(lexeme string) bool {
+	if _, err := strconv.Atoi(lexeme); err != nil {
 		return false
 	}
 
 	return true
 }
 
-func checkValueIsLetter(value string) bool {
-	for _, r := range value {
-		if !unicode.IsLetter(r) {
-			return false
+func isIdentifierStart(lexeme string) bool {
+	return regexp.MustCompile(`[a-zA-Z_]`).MatchString(lexeme)
+}
+
+func isIdentifier(lexeme string) bool {
+	return isIdentifierStart(lexeme) || regexp.MustCompile(`[0-9-]`).MatchString(lexeme)
+}
+
+func isOperator(lexeme string) bool {
+	for _, operator := range bnfConfig.Operators {
+		if operator == lexeme {
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
-func checkValueIsVariable(value string) bool {
-	if checkValueIsString(value) {
-		return false
+func isPunctuation(lexeme string) bool {
+	for _, key := range bnfConfig.Punctuation {
+		if key == lexeme {
+			return true
+		}
 	}
 
-	if _, err := strconv.Atoi(string(value)); err == nil {
-		return false
-	}
+	return false
+}
 
-	if !checkValueIsLetter(value) {
-		return false
-	}
+func isWhitespace(lexeme string) bool {
+	return regexp.MustCompile(`[[:space:]]`).MatchString(lexeme)
+}
 
-	return true
+func isCall(lexeme string) bool {
+	return regexp.MustCompile(`[a-zA-Z_0-9.]`).MatchString(lexeme)
 }
