@@ -11,15 +11,17 @@ type Token struct {
 }
 
 const (
-	classVariable    = "variable"
-	classFunction    = "function"
-	classKeyword     = "keyword"
-	classCall        = "call"
-	classString      = "string"
-	classPunctuation = "punctuation"
-	classOperator    = "operator"
-	classNumber      = "number"
-	classType        = "type"
+	ClassVariable    = "variable"
+	ClassFunction    = "function"
+	ClassKeyword     = "keyword"
+	ClassCall        = "call"
+	ClassString      = "string"
+	ClassPunctuation = "punctuation"
+	ClassOperator    = "operator"
+	ClassNumber      = "number"
+	ClassType        = "type"
+	ClassBool        = "bool"
+	ClassProgram     = "program"
 )
 
 func readWhile(input stream, predicate func(lexeme string) bool) (lexeme string) {
@@ -47,7 +49,7 @@ func readNumber(input stream) *Token {
 	)
 
 	return &Token{
-		Class: classNumber,
+		Class: ClassNumber,
 		Value: number,
 	}
 }
@@ -55,13 +57,13 @@ func readNumber(input stream) *Token {
 func readIdentifier(input stream) *Token {
 	id := readWhile(input, isIdentifier)
 
-	var class = classVariable
+	var class = ClassVariable
 	if isKeyword(id) {
-		class = classKeyword
+		class = ClassKeyword
 	}
 
 	if isType(id) {
-		class = classType
+		class = ClassType
 	}
 
 	return &Token{
@@ -74,7 +76,7 @@ func readCaller(input stream) *Token {
 	caller := readWhile(input, isCall)
 
 	return &Token{
-		Class: classCall,
+		Class: ClassCall,
 		Value: caller,
 	}
 }
@@ -105,7 +107,7 @@ func readEscaped(input stream, end string) string {
 
 func readString(input stream) *Token {
 	return &Token{
-		Class: classString,
+		Class: ClassString,
 		Value: readEscaped(input, `"`),
 	}
 }
@@ -151,14 +153,14 @@ func readNext(input stream) (token *Token) {
 
 		if isPunctuation(ch) {
 			return &Token{
-				Class: classPunctuation,
+				Class: ClassPunctuation,
 				Value: input.next(),
 			}
 		}
 
 		if isOperator(ch) {
 			return &Token{
-				Class: classOperator,
+				Class: ClassOperator,
 				Value: readWhile(input, isOperator),
 			}
 		}

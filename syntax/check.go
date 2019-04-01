@@ -1,51 +1,96 @@
 package syntax
 
 import (
-	"fmt"
-
 	"github.com/enabokov/language/lexis"
 )
 
-func checkPackageExpression(tokens []lexis.Token) ([]lexis.Token, error) {
-	var err error
-	var currentToken lexis.Token
-	var nextToken lexis.Token
+var priorities = map[string]int{
+	`=`:  1,
+	`||`: 2,
+	`&&`: 3,
+	`<`:  7, `>`: 7, `<=`: 7, `>=`: 7, `==`: 7, `!=`: 7,
+	`+`: 10, `-`: 10,
+	`*`: 20, `/`: 20, `%`: 20,
+}
 
-	currentToken, tokens = tokens[0], tokens[1:]
-	nextToken, tokens = tokens[0], tokens[1:]
-
-	if currentToken.Class == "keyword" && currentToken.Value == "package" {
-		if nextToken.Class == "variable" && nextToken.Value != "" {
-			return tokens, nil
+func isPackage(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassKeyword && token.Value == "package" {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassVariable {
+			return true
 		}
 	}
 
-	err = fmt.Errorf(fmt.Sprintf("Failed to parse package expression: '%s %s'", currentToken.Value, nextToken.Value))
-	return tokens, err
+	return false
 }
 
-func _importCheck(current lexis.Token, next lexis.Token) (bool, error) {
-	var err error
-	if current.Class == "keyword" && current.Value == "import" {
-		if next.Class == "string" && next.Value != "" {
-			return true, nil
+func isImport(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassKeyword && token.Value == "import" {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassString {
+			return true
 		}
-
-		err = fmt.Errorf(fmt.Sprintf("Failed to parse import expression: '%s %s'. Add double qoutes", current.Value, next.Value))
 	}
 
-	return false, err
+	return false
 }
 
-func checkImportExpression(tokens []lexis.Token) ([]lexis.Token, error) {
-	var err error
-
-	i := 0
-	var ok bool
-	for ok = true; ok; ok, err = _importCheck(tokens[i], tokens[i+1]) {
-		tokens = tokens[2:]
-		i = 0
+func isFunction(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassKeyword && token.Value == "def" {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassVariable {
+			return true
+		}
 	}
 
-	return tokens, err
+	return false
+}
+
+func isVariable(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassKeyword && token.Value == "var" {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassVariable {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isCaller(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassVariable && input.Peek().Class == lexis.ClassCall {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassCall {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isAssignment(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassVariable && input.Peek().Class == lexis.ClassOperator && input.Peek().Value == `=` {
+		return true
+	}
+
+	return false
+}
+
+func isCondition(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassKeyword && token.Value == "if" {
+		nextToken := input.Peek()
+		if nextToken.Class == lexis.ClassVariable {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isBinaryExpression(input lexis.TokenStream, token *lexis.Token) bool {
+	if token.Class == lexis.ClassVariable && input.Peek().Class == lexis.ClassOperator {
+		return true
+	}
+
+	return false
 }

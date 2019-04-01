@@ -50,17 +50,17 @@ func readInputStream(input []string) stream {
 	return stream{next, peek, eof, croak}
 }
 
-type tokenStream struct {
-	next  func() *Token
-	peek  func() *Token
-	eof   func() bool
-	croak func(string) error
+type TokenStream struct {
+	Next  func() *Token
+	Peek  func() *Token
+	EOF   func() bool
+	Croak func(string) error
 }
 
-func readTokenStream(input stream) tokenStream {
+func readTokenStream(input stream) TokenStream {
 	var current *Token
 
-	next := func() (token *Token) {
+	Next := func() (token *Token) {
 		token = current
 		current = nil
 
@@ -71,7 +71,7 @@ func readTokenStream(input stream) tokenStream {
 		return token
 	}
 
-	peek := func() *Token {
+	Peek := func() *Token {
 		if current == nil {
 			current = readNext(input)
 		}
@@ -79,9 +79,9 @@ func readTokenStream(input stream) tokenStream {
 		return current
 	}
 
-	eof := func() bool {
-		return peek() == nil
+	EOF := func() bool {
+		return Peek() == nil
 	}
 
-	return tokenStream{next, peek, eof, input.croak}
+	return TokenStream{Next, Peek, EOF, input.croak}
 }

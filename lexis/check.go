@@ -6,7 +6,7 @@ import (
 )
 
 func isKeyword(lexeme string) bool {
-	for _, key := range bnfConfig.Keywords {
+	for _, key := range BnfConfig.Keywords {
 		if key == lexeme {
 			return true
 		}
@@ -16,7 +16,7 @@ func isKeyword(lexeme string) bool {
 }
 
 func isType(lexeme string) bool {
-	for _, key := range bnfConfig.Types {
+	for _, key := range BnfConfig.Types {
 		if key == lexeme {
 			return true
 		}
@@ -42,7 +42,7 @@ func isIdentifier(lexeme string) bool {
 }
 
 func isOperator(lexeme string) bool {
-	for _, operator := range bnfConfig.Operators {
+	for _, operator := range BnfConfig.Operators {
 		if operator == lexeme {
 			return true
 		}
@@ -52,7 +52,7 @@ func isOperator(lexeme string) bool {
 }
 
 func isPunctuation(lexeme string) bool {
-	for _, key := range bnfConfig.Punctuation {
+	for _, key := range BnfConfig.Punctuation {
 		if key == lexeme {
 			return true
 		}
