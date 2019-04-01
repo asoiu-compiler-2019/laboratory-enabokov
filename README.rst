@@ -1,7 +1,18 @@
-============================================
-Lexic, syntax, semantic analyzers for Golang
-============================================
+=================
+Language compiler
+=================
 
-Changes:
-   - `func` -> `function`
-   - only explicit typing (int, double, float, long, string, etc...)
+**grammar**
+   *description*
+
+Analyzers
+=========
+
+**lexis**
+   *description*
+
+**syntax**
+   *description*
+
+**semantics**
+   *description*
