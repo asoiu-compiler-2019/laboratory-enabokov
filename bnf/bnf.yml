@@ -21,7 +21,7 @@ types: ['string', 'int', 'long', 'double', 'float', 'uint64']
 keywords: ['def', 'break', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'package', 'switch', 'const', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var']
 operators: ['+', '&', '+=', '&=', '&&', '==', '!=', '-', '|', '-=', '|=', '||', '<', '<=',  '*', '^', '*=', '^=', '<-', '>', '>=', '/', '<<', '/=', '<<=', '++', '=',  '%', '>>', '%=', '--', '!', ':']
 punctuation: ['(', ')', '[', ']', '{', '}', ',', ';', '...', '.']
-comments: '//'
+comments: '#'
 
 integerLiterals:
   alternatives:
@@ -44,13 +44,6 @@ arrayLiterals:
   alternatives:
   - type: 'possibleType [ length ]'
     length: 'expression'
-
-structTypes:
-  alternatives:
-  - type: 'struct { { fieldDecl ; } }'
-    fieldDecl: '(identifierList possibleType | embeddedField) [ tag ]'
-    embeddedField: '[ * ] typeName'
-    tag: 'stringLit'
 
 functionTypes:
   alternatives:

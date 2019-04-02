@@ -1,0 +1,3 @@
+package main
+
+def main(a, b) {}

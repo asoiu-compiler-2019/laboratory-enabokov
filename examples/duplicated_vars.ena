@@ -1,0 +1,10 @@
+package test
+
+import "fmt"
+
+def do(a, b) {
+    var a int
+    var c int
+
+    fmt.Println(a, b, c)    
+}
