@@ -1,56 +1,56 @@
 package syntax
 
-type astNode interface{}
+type ASTNode interface{}
 
-type tokenPrimitive struct {
+type TokenPrimitive struct {
 	Class string
 	Value string
 }
 
-type tokenVariable struct {
+type TokenVariable struct {
 	Class string
 	Name  string
 	Type  string
 }
 
-type tokenPackage struct {
+type TokenPackage struct {
 	Class string
 	Value string
 }
 
-type tokenImport struct {
+type TokenImport struct {
 	Class string
 	Value string
 }
 
-type tokenCondition struct {
+type TokenCondition struct {
 	Class     string
-	Condition tokenBinaryExprOrAssign
-	Do        []astNode
-	Else      astNode
+	Condition TokenBinaryOrAssign
+	Do        []ASTNode
+	Else      ASTNode
 }
 
-type tokenCall struct {
+type TokenCall struct {
 	Class string
-	Func  tokenVariable
-	Args  []tokenVariable
+	Func  TokenVariable
+	Args  []TokenVariable
 }
 
-type tokenBinaryExprOrAssign struct {
+type TokenBinaryOrAssign struct {
 	Class    string
 	Operator string
-	Left     tokenPrimitive
-	Right    *tokenBinaryExprOrAssign
+	Left     TokenPrimitive
+	Right    *TokenBinaryOrAssign
 }
 
-type tokenFunction struct {
+type TokenFunction struct {
 	Class  string
 	Name   string
-	Params []tokenVariable
-	Body   []astNode
+	Params []TokenVariable
+	Body   []ASTNode
 }
 
-type tokenProgram struct {
+type TokenProgram struct {
 	Class      string
-	Expression []astNode
+	Expression []ASTNode
 }

@@ -1,15 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/enabokov/language/lexis"
+	"github.com/enabokov/language/semantics"
 	"github.com/enabokov/language/syntax"
 )
 
 func main() {
 	filename := os.Args[1]
 	tokenStream := lexis.Analyze(filename)
-	fmt.Println(syntax.Analyze(tokenStream))
+	ast := syntax.Analyze(tokenStream)
+	err := semantics.Analyze(ast)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("OK")
 }

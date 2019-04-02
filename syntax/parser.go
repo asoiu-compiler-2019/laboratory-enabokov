@@ -6,10 +6,9 @@ import (
 	"strconv"
 
 	"github.com/enabokov/language/lexis"
-	"github.com/kr/pretty"
 )
 
-func parseParams(input lexis.TokenStream, params *[]tokenVariable, requiredParam bool) error {
+func parseParams(input lexis.TokenStream, params *[]TokenVariable, requiredParam bool) error {
 	nextToken := input.Peek()
 	if nextToken.Class == lexis.ClassVariable {
 		if !requiredParam {
@@ -20,7 +19,7 @@ func parseParams(input lexis.TokenStream, params *[]tokenVariable, requiredParam
 
 		*params = append(
 			*params,
-			tokenVariable{
+			TokenVariable{
 				Class: t.Class,
 				Name:  t.Value,
 			},
@@ -48,9 +47,9 @@ func parseParams(input lexis.TokenStream, params *[]tokenVariable, requiredParam
 	return nil
 }
 
-func parseArgs(input lexis.TokenStream, params *[]tokenVariable, requiredParam bool) error {
+func parseArgs(input lexis.TokenStream, params *[]TokenVariable, requiredParam bool) error {
 	nextToken := input.Peek()
-	if nextToken.Class == lexis.ClassVariable {
+	if nextToken.Class == lexis.ClassVariable || nextToken.Class == lexis.ClassString {
 		if !requiredParam {
 			return input.Croak(fmt.Sprintf("Got `%s`. Expected `,` or `)`", input.Peek().Value))
 		}
@@ -58,7 +57,7 @@ func parseArgs(input lexis.TokenStream, params *[]tokenVariable, requiredParam b
 		t := input.Next()
 		*params = append(
 			*params,
-			tokenVariable{
+			TokenVariable{
 				Class: t.Class,
 				Name:  t.Value,
 			},
@@ -86,46 +85,46 @@ func parseArgs(input lexis.TokenStream, params *[]tokenVariable, requiredParam b
 	return nil
 }
 
-func parseBody(input lexis.TokenStream, body *[]astNode) error {
+func parseBody(input lexis.TokenStream, body *[]ASTNode) error {
 	token := input.Next()
 	if token.Class != lexis.ClassPunctuation || token.Value != `{` {
 		return input.Croak(fmt.Sprintf("Got `%s`. Expected {", token.Value))
 	}
 
 	for input.Peek().Class != lexis.ClassPunctuation || input.Peek().Value != `}` {
-		astNode, err := expression(input)
+		ASTNode, err := expression(input)
 		if err != nil {
-			return input.Croak("Oooops" + err.Error())
+			return err
 		}
 
-		*body = append(*body, astNode)
+		*body = append(*body, ASTNode)
 	}
 
 	input.Next()
 	return nil
 }
 
-func parseFunction(input lexis.TokenStream) (tokenFunction, error) {
+func parseFunction(input lexis.TokenStream) (TokenFunction, error) {
 	// get function name
 	name := input.Next().Value
 
 	var (
-		params []tokenVariable
+		params []TokenVariable
 		err    error
 	)
 
 	if token := input.Next(); token.Class != lexis.ClassPunctuation || token.Value != `(` {
-		return tokenFunction{}, input.Croak(fmt.Sprintf("Got `%s`. Expected `(`", token.Value))
+		return TokenFunction{}, input.Croak(fmt.Sprintf("Got `%s`. Expected `(`", token.Value))
 	}
 
 	if err = parseParams(input, &params, true); err != nil {
-		return tokenFunction{}, err
+		return TokenFunction{}, err
 	}
 
-	var body []astNode
+	var body []ASTNode
 	err = parseBody(input, &body)
 
-	return tokenFunction{
+	return TokenFunction{
 		Class:  `function`,
 		Name:   name,
 		Params: params,
@@ -133,41 +132,41 @@ func parseFunction(input lexis.TokenStream) (tokenFunction, error) {
 	}, err
 }
 
-func parsePackage(input lexis.TokenStream) (tokenPackage, error) {
-	return tokenPackage{Class: `package`, Value: input.Next().Value}, nil
+func parsePackage(input lexis.TokenStream) (TokenPackage, error) {
+	return TokenPackage{Class: `package`, Value: input.Next().Value}, nil
 }
 
-func parseVariable(input lexis.TokenStream) (tokenVariable, error) {
+func parseVariable(input lexis.TokenStream) (TokenVariable, error) {
 	name := input.Next().Value
 	token := input.Next()
 	if token.Class != lexis.ClassType {
-		return tokenVariable{}, input.Croak(fmt.Sprintf("Got `%s`. Expected type of variable", token.Value))
+		return TokenVariable{}, input.Croak(fmt.Sprintf("Got `%s`. Expected type of variable", token.Value))
 	}
 
-	return tokenVariable{Class: `variable`, Name: name, Type: token.Value}, nil
+	return TokenVariable{Class: `variable`, Name: name, Type: token.Value}, nil
 }
 
-func parseImport(input lexis.TokenStream) (tokenImport, error) {
-	return tokenImport{Class: `import`, Value: input.Next().Value}, nil
+func parseImport(input lexis.TokenStream) (TokenImport, error) {
+	return TokenImport{Class: `import`, Value: input.Next().Value}, nil
 }
 
-func parseCaller(input lexis.TokenStream, token *lexis.Token) (tokenCall, error) {
+func parseCaller(input lexis.TokenStream, token *lexis.Token) (TokenCall, error) {
 	nextToken := input.Next()
 	if input.Peek().Class == lexis.ClassPunctuation && input.Peek().Value == "(" {
 		input.Next()
 	}
 
-	var args []tokenVariable
+	var args []TokenVariable
 
 	err := parseArgs(input, &args, true)
-	return tokenCall{
+	return TokenCall{
 		Class: `caller`,
-		Func:  tokenVariable{Class: token.Class, Name: token.Value + nextToken.Value},
+		Func:  TokenVariable{Class: token.Class, Name: token.Value + nextToken.Value},
 		Args:  args,
 	}, err
 }
 
-func _parse(operators []string, numbers []string, result *tokenBinaryExprOrAssign) error {
+func _parse(operators []string, numbers []string, result *TokenBinaryOrAssign) error {
 	var op string
 	var num string
 
@@ -182,18 +181,18 @@ func _parse(operators []string, numbers []string, result *tokenBinaryExprOrAssig
 
 	if len(numbers) > 0 {
 		num, numbers = numbers[0], numbers[1:]
-		result.Left = tokenPrimitive{
+		result.Left = TokenPrimitive{
 			Class: `number`,
 			Value: num,
 		}
 	}
 
 	result.Class = `binary`
-	result.Right = &tokenBinaryExprOrAssign{}
+	result.Right = &TokenBinaryOrAssign{}
 	return _parse(operators, numbers, result.Right)
 }
 
-func parseBinaryExpression(input lexis.TokenStream, token *lexis.Token) (tokenBinaryExprOrAssign, error) {
+func parseBinaryExpression(input lexis.TokenStream, token *lexis.Token) (TokenBinaryOrAssign, error) {
 	var numbers []string
 	var operators []string
 
@@ -221,44 +220,44 @@ func parseBinaryExpression(input lexis.TokenStream, token *lexis.Token) (tokenBi
 		break
 	}
 
-	var res = tokenBinaryExprOrAssign{Class: `assignment`}
+	var res = TokenBinaryOrAssign{Class: `assignment`}
 	err := _parse(operators, numbers, &res)
 	return res, err
 }
 
-func parseAssignment(input lexis.TokenStream, token *lexis.Token) (tokenBinaryExprOrAssign, error) {
+func parseAssignment(input lexis.TokenStream, token *lexis.Token) (TokenBinaryOrAssign, error) {
 	nextToken := input.Next()
 	number := input.Peek()
 
 	res, err := parseBinaryExpression(input, number)
 
 	if _, err := strconv.Atoi(token.Value); err == nil {
-		return tokenBinaryExprOrAssign{}, input.Croak(fmt.Sprintf("Got %s. Cannot assign to number", token.Value))
+		return TokenBinaryOrAssign{}, input.Croak(fmt.Sprintf("Got %s. Cannot assign to number", token.Value))
 	}
 
-	return tokenBinaryExprOrAssign{
+	return TokenBinaryOrAssign{
 		Class:    `assignment`,
 		Operator: nextToken.Value,
-		Left:     tokenPrimitive{Class: `variable`, Value: token.Value},
+		Left:     TokenPrimitive{Class: `variable`, Value: token.Value},
 		Right:    &res,
 	}, err
 }
 
-func parseCondition(input lexis.TokenStream, token *lexis.Token) (tokenCondition, error) {
+func parseCondition(input lexis.TokenStream, token *lexis.Token) (TokenCondition, error) {
 	input.Next()
 
-	var body []astNode
+	var body []ASTNode
 	cond, err := parseBinaryExpression(input, token)
 	err = parseBody(input, &body)
 
-	return tokenCondition{
+	return TokenCondition{
 		Class:     `condition`,
 		Condition: cond,
 		Do:        body,
 	}, err
 }
 
-func expression(input lexis.TokenStream) (astNode, error) {
+func expression(input lexis.TokenStream) (ASTNode, error) {
 	token := input.Next()
 	switch {
 	default:
@@ -282,11 +281,7 @@ func expression(input lexis.TokenStream) (astNode, error) {
 	}
 }
 
-func program(input lexis.TokenStream) bool {
-	var prog = tokenProgram{
-		Class: "program",
-	}
-
+func program(input lexis.TokenStream) (ast TokenProgram) {
 	for !input.EOF() {
 		token, err := expression(input)
 		if err != nil {
@@ -294,9 +289,9 @@ func program(input lexis.TokenStream) bool {
 			break
 		}
 
-		prog.Expression = append(prog.Expression, token)
+		ast.Expression = append(ast.Expression, token)
 	}
 
-	fmt.Printf("%# v", pretty.Formatter(prog))
-	return true
+	ast.Class = `program`
+	return ast
 }
